@@ -16,20 +16,20 @@ steps:
   - task: qetza.replacetokens.replacetokens-task.replacetokens@3
     displayName: "Replace tokens in deployment.template.json"
     inputs:
-      rootDirectory: EdgeSolution
+      rootDirectory: MeatGeek-IoT-Edge
       targetFiles: deployment.template.json
 
   - task: qetza.replacetokens.replacetokens-task.replacetokens@3
     displayName: "Replace tokens in modules/**/module.json"
     inputs:
-      rootDirectory: EdgeSolution
+      rootDirectory: MeatGeek-IoT-Edge
       targetFiles: "modules/**/module.json"
 
   - task: AzureIoTEdge@2
     displayName: "Azure IoT Edge - Build module images"
     inputs:
       deploymentid: "azuredevops-deployment"
-      templateFilePath: EdgeSolution/deployment.template.json
+      templateFilePath: MeatGeek-IoT-Edge/deployment.template.json
 
   - task: PublishBuildArtifacts@1
     displayName: "Publish Artifact: drop"
