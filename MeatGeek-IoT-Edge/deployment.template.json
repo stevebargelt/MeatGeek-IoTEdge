@@ -11,9 +11,9 @@
             "loggingOptions": "",
             "registryCredentials": {
               "meatgeek": {
-                "username": "$CONTAINER_REGISTRY_USERNAME_meatgeek",
-                "password": "$CONTAINER_REGISTRY_PASSWORD_meatgeek",
-                "address": "meatgeek.azurecr.io"
+                "username": "#{acr.user}#",
+                "password": "#{acr.password}#",
+                "address": "#{acr.host}#"
               }
             }
           }
@@ -93,9 +93,9 @@
       }
     },
     "CSharpModule": {
-       "properties.desired":{
-           "TemperatureThreshold":25
-       }
-   }    
+      "properties.desired": {
+        "TemperatureThreshold": 25
+      }
+    }
   }
 }
