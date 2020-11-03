@@ -1,0 +1,4 @@
+config/
+support_bundle/
+support_bundle.zip
+.env
