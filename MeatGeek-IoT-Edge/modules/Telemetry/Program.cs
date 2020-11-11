@@ -34,7 +34,7 @@ namespace Telemetry
 
             Console.WriteLine(
                 $"Initializing telemetry to send SmokerStatus "
-                + $"messages, at an interval of {telemetryInterval.TotalSeconds} seconds.\n"
+                + $"messages, at an interval of {telemetryInterval.TotalSeconds} seconds."
                 + $"more message here... ");
 
             MqttTransportSettings mqttSetting = new MqttTransportSettings(TransportType.Mqtt_Tcp_Only);
