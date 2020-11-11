@@ -8,13 +8,7 @@
       "processId": "${command:pickRemoteProcess}",
       "pipeTransport": {
         "pipeProgram": "docker",
-        "pipeArgs": [
-          "exec",
-          "-i",
-          "CSharpModule",
-          "sh",
-          "-c"
-        ],
+        "pipeArgs": ["exec", "-i", "CSharpModule", "sh", "-c"],
         "debuggerPath": "~/vsdbg/vsdbg",
         "pipeCwd": "${workspaceFolder}",
         "quoteArgs": true
@@ -45,13 +39,7 @@
       "processId": "${command:pickRemoteProcess}",
       "pipeTransport": {
         "pipeProgram": "docker",
-        "pipeArgs": [
-          "exec",
-          "-i",
-          "Telemetry",
-          "sh",
-          "-c"
-        ],
+        "pipeArgs": ["exec", "-i", "Telemetry", "sh", "-c"],
         "debuggerPath": "~/vsdbg/vsdbg",
         "pipeCwd": "${workspaceFolder}",
         "quoteArgs": true
