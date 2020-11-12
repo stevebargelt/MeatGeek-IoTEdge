@@ -3,7 +3,7 @@
 # https://aka.ms/yaml
 
 pool:
-  name: Hosted Ubuntu 1604
+  name: Hosted Ubuntu 2004
 
 steps:
   - task: CopyFiles@2
