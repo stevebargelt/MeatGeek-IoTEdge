@@ -3,7 +3,7 @@
 # https://aka.ms/yaml
 
 pool:
-  name: "meatgeek1-rpi"
+  name: "ARM"
 
 steps:
   - task: CopyFiles@2
