@@ -39,7 +39,7 @@ steps:
       deploymentid: "vsts-deployment"
       azureSubscriptionEndpoint: "Visual Studio Enterprise (2394ff5d-4d73-4134-a00f-2385754aeeb5)"
       azureContainerRegistry: '{"loginServer":"meatgeek.azurecr.io", "id" : "/subscriptions/2394ff5d-4d73-4134-a00f-2385754aeeb5/resourceGroups/MeatGeek-Shared/providers/Microsoft.ContainerRegistry/registries/meatgeek"}'
-      templateFilePath: "$(System.DefaultWorkingDirectory)/$(Release.PrimaryArtifactSourceAlias)/drop/MeatGeek-IoT-Edge/deployment.template.json"
+      templateFilePath: "$(System.DefaultWorkingDirectory)/MeatGeek-IoT-Edge/deployment.template.json"
       defaultPlatform: arm32v7
 
   - task: PublishBuildArtifacts@1
