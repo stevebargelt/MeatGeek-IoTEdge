@@ -48,8 +48,9 @@ namespace Telemetry
 
             //(CancellationTokenSource cts, ManualResetEventSlim completed, Option<object> handler) = ShutdownHandler.Init(TimeSpan.FromSeconds(5), null);
 
+            deviceId = Environment.GetEnvironmentVariable("IOTEDGE_DEVICEID");
+            //moduleId = "IOTEDGE_MODULEID"
             Twin currentTwinProperties = await moduleClient.GetTwinAsync();
-            deviceId = currentTwinProperties.DeviceId;
             if (currentTwinProperties.Properties.Desired.Contains("TelemetryInterval"))
             {
                 telemetryInterval = TimeSpan.FromSeconds((int)currentTwinProperties.Properties.Desired["TelemetryInterval"]);
