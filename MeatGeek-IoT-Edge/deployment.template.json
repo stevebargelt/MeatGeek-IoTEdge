@@ -84,6 +84,25 @@
             "restartPolicy": "always",
             "settings": {
               "image": "${MODULES.Telemetry}",
+              "createOptions": {
+                "NetworkingConfig": {
+                  "EndpointsConfig": {
+                    "host": {}
+                  }
+                },
+                "HostConfig": {
+                  "NetworkMode": "host"
+                }
+              }
+            }
+          },
+          "SmokerControl": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "${MODULES.SmokerControl}",
               "createOptions": {}
             }
           }
@@ -96,7 +115,8 @@
         "routes": {
           "CSharpModuleToIoTHub": "FROM /messages/modules/CSharpModule/outputs/* INTO $upstream",
           "sensorToCSharpModule": "FROM /messages/modules/SimulatedTemperatureSensor/outputs/temperatureOutput INTO BrokeredEndpoint(\"/modules/CSharpModule/inputs/input1\")",
-          "TelemetryToIoTHub": "FROM /messages/modules/Telemetry/outputs/* INTO $upstream"
+          "TelemetryToIoTHub": "FROM /messages/modules/Telemetry/outputs/* INTO $upstream",
+          "SmokerControlToIoTHub": "FROM /messages/modules/SmokerControl/outputs/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
