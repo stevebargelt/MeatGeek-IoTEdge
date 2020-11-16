@@ -95,7 +95,6 @@ namespace Telemetry
                         json = content.ReadAsStringAsync().Result;
                     }
                 }
-                
 
                 Console.WriteLine($"Device sending Event/Telemetry to IoT Hub...");
                 SmokerStatus status = JsonConvert.DeserializeObject<SmokerStatus>(await _httpClient.GetStringAsync("http://localhost:5000/api/status"));
@@ -110,7 +109,7 @@ namespace Telemetry
                 eventMessage.Properties.Add("batchId", BatchId.ToString());
                 Console.WriteLine($"\t{DateTime.Now.ToLocalTime()}> Sending message: {count}, Body: [{json}]");
 
-                await moduleClient.SendEventAsync("smokerStatusOutput", eventMessage);
+                await moduleClient.SendEventAsync(eventMessage);
                 count++;
                 await Task.Delay(telemetryInterval);
             }
@@ -126,7 +125,7 @@ namespace Telemetry
             }
             
             var moduleClient = (ModuleClient)userContext;
-            var patch = new TwinCollection($"{{ \"TeelemetryInterval\": {telemetryInterval.TotalSeconds}}}");
+            var patch = new TwinCollection($"{{ \"TelemetryInterval\": {telemetryInterval.TotalSeconds}}}");
             await moduleClient.UpdateReportedPropertiesAsync(patch); // Just report back last desired property.
         }
 
