@@ -100,16 +100,13 @@ namespace Telemetry
                 SmokerStatus status = JsonConvert.DeserializeObject<SmokerStatus>(await _httpClient.GetStringAsync("http://localhost:5000/api/status"));
                 status.SmokerId = deviceId;
                 status.PartitionKey = $"{status.SmokerId}-{DateTime.UtcNow:yyyy-MM}";
-                Console.WriteLine($"{status.PartitionKey},{status.CurrentTime},{status.SmokerId},{status.ttl},{status.SetPoint},{status.Temps.GrillTemp},{status.Temps.Probe1Temp},{status.Temps.Probe2Temp},{status.Temps.Probe3Temp},{status.Temps.Probe4Temp}");
                 json = JsonConvert.SerializeObject(status);
-                Console.WriteLine($"Sending {json}");
                 Message eventMessage = new Message(Encoding.UTF8.GetBytes(json));
-
                 eventMessage.Properties.Add("sequenceNumber", count.ToString());
                 eventMessage.Properties.Add("batchId", BatchId.ToString());
                 Console.WriteLine($"\t{DateTime.Now.ToLocalTime()}> Sending message: {count}, Body: [{json}]");
 
-                await moduleClient.SendEventAsync(eventMessage);
+                await moduleClient.SendEventAsync("output1", eventMessage);
                 count++;
                 await Task.Delay(telemetryInterval);
             }
