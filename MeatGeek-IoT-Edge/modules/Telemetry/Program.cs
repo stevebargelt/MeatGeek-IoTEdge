@@ -226,7 +226,7 @@ namespace Telemetry
             }
 
             // set logging sinks
-            //loggerConfiguration.WriteTo.Console(outputTemplate: "<{Severity}> {Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] - {Message}{NewLine}{Exception}");
+            loggerConfiguration.WriteTo.Console(outputTemplate: "<{Severity}> {Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] - {Message}{NewLine}{Exception}");
             loggerConfiguration.Enrich.With(SeverityEnricher.Instance);
             loggerConfiguration.Enrich.FromLogContext();
             Log.Logger = loggerConfiguration.CreateLogger();
