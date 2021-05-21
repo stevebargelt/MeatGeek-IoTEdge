@@ -22,6 +22,7 @@ namespace Telemetry
     class Program
     {
         static TimeSpan telemetryInterval { get; set; } = TimeSpan.FromSeconds(10);
+        static string SessionID { get; set; }
         private static CancellationTokenSource _cts;
         static string deviceId {get; set; } 
         private static HttpClient _httpClient = new HttpClient();
@@ -44,9 +45,14 @@ namespace Telemetry
             {
                 telemetryInterval = TimeSpan.FromSeconds((int)currentTwinProperties.Properties.Desired["TelemetryInterval"]);
             }
+            if (currentTwinProperties.Properties.Desired.Contains("SessionId"))
+            {
+                SessionID = currentTwinProperties.Properties.Desired["SessionId"];
+            }
             ModuleClient userContext = moduleClient;      
             await moduleClient.SetDesiredPropertyUpdateCallbackAsync(OnDesiredPropertiesUpdated, userContext);
             //await moduleClient.SetInputMessageHandlerAsync("control", ControlMessageHandle, userContext);
+            await moduleClient.SetMethodHandlerAsync("SetTelemetryInterval", SetTelemetryInterval, userContext);
             
             await SendEvents(moduleClient, _cts.Token);
 
@@ -148,6 +154,10 @@ namespace Telemetry
 
                 Log.Information($"Device sending Event/Telemetry to IoT Hub...");
                 SmokerStatus status = JsonConvert.DeserializeObject<SmokerStatus>(await _httpClient.GetStringAsync("http://localhost:5000/api/status"));
+                if (!string.IsNullOrEmpty(SessionID)) 
+                {
+                   status.SessionId = SessionID;
+                }
                 status.SmokerId = deviceId;
                 status.PartitionKey = $"{status.SmokerId}-{DateTime.UtcNow:yyyy-MM}";
                 json = JsonConvert.SerializeObject(status);
@@ -180,16 +190,52 @@ namespace Telemetry
 
         static async Task OnDesiredPropertiesUpdated(TwinCollection desiredPropertiesPatch, object userContext)
         {
+            Console.WriteLine("Desired property change:");
+            Console.WriteLine(JsonConvert.SerializeObject(desiredPropertiesPatch));
+
+            var reportedProperties = new TwinCollection();
+
             // At this point just update the configure configuration.
             if (desiredPropertiesPatch.Contains("TelemetryInterval"))
             {
                 telemetryInterval = TimeSpan.FromSeconds((int)desiredPropertiesPatch["TelemetryInterval"]);
+                reportedProperties["TelemetryInterval"] = telemetryInterval;
+                
             }
-            
+            if (desiredPropertiesPatch.Contains("SessionId"))
+            {
+                SessionID = desiredPropertiesPatch["SessionId"];
+                reportedProperties["SessionId"] = SessionID;
+            }            
             var moduleClient = (ModuleClient)userContext;
-            var patch = new TwinCollection($"{{ \"TelemetryInterval\": {telemetryInterval.TotalSeconds}}}");
-            await moduleClient.UpdateReportedPropertiesAsync(patch); // Just report back last desired property.
+            //var patch = new TwinCollection($"{{ \"TelemetryInterval\": {telemetryInterval.TotalSeconds} }}");
+            //await moduleClient.UpdateReportedPropertiesAsync(patch); // Just report back last desired property.
+            await moduleClient.UpdateReportedPropertiesAsync(reportedProperties).ConfigureAwait(false);
         }
+
+       // Handle the direct method call
+        private static Task<MethodResponse> SetTelemetryInterval(MethodRequest methodRequest, object userContext)
+        {
+            var data = Encoding.UTF8.GetString(methodRequest.Data);
+
+            int newTelemetryInterval;
+            // Check the payload is a single integer value
+            if (Int32.TryParse(data, out newTelemetryInterval))
+            {
+                telemetryInterval = TimeSpan.FromSeconds(newTelemetryInterval);
+                Console.WriteLine($"Telemetry interval set to {0} seconds", data);
+                // Acknowlege the direct method call with a 200 success message
+                string result = "{\"result\":\"Executed direct method: " + methodRequest.Name + "\"}";
+                return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 200));
+            }
+            else
+            {
+                // Acknowlege the direct method call with a 400 error message
+                string result = "{\"result\":\"Invalid parameter\"}";
+                return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 400));
+            }
+        }
+
 
         /// <summary>
         /// Initialize logging using Serilog
