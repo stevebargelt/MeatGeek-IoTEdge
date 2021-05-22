@@ -2,8 +2,6 @@ namespace Telemetry
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
-    using System.Net;
     using System.Net.Http;
     using System.Runtime.Loader;
     using System.Text;
@@ -53,6 +51,8 @@ namespace Telemetry
             await moduleClient.SetDesiredPropertyUpdateCallbackAsync(OnDesiredPropertiesUpdated, userContext);
             //await moduleClient.SetInputMessageHandlerAsync("control", ControlMessageHandle, userContext);
             await moduleClient.SetMethodHandlerAsync("SetTelemetryInterval", SetTelemetryInterval, userContext);
+            await moduleClient.SetMethodHandlerAsync("SetSessionId", SetSessionId, userContext);
+            await moduleClient.SetMethodHandlerAsync("EndSession", EndSession, userContext);
             
             await SendEvents(moduleClient, _cts.Token);
 
@@ -180,7 +180,7 @@ namespace Telemetry
                     //telemetry.TrackEvent("85-ErrorHeartbeatMessageNotSentToEdgeHub", telemetryProperties);
                 }
 
-                //Console.WriteLine($"\t{DateTime.Now.ToLocalTime()}> Sending message: {count}, Body: [{json}]");
+                //Log.Information($"\t{DateTime.Now.ToLocalTime()}> Sending message: {count}, Body: [{json}]");
                 //await moduleClient.SendEventAsync("output1", eventMessage);
                 count++;
                 await Task.Delay(telemetryInterval);
@@ -190,8 +190,8 @@ namespace Telemetry
 
         static async Task OnDesiredPropertiesUpdated(TwinCollection desiredPropertiesPatch, object userContext)
         {
-            Console.WriteLine("Desired property change:");
-            Console.WriteLine(JsonConvert.SerializeObject(desiredPropertiesPatch));
+            Log.Information("Desired property change:");
+            Log.Information(JsonConvert.SerializeObject(desiredPropertiesPatch));
 
             var reportedProperties = new TwinCollection();
 
@@ -213,7 +213,6 @@ namespace Telemetry
             await moduleClient.UpdateReportedPropertiesAsync(reportedProperties).ConfigureAwait(false);
         }
 
-       // Handle the direct method call
         private static Task<MethodResponse> SetTelemetryInterval(MethodRequest methodRequest, object userContext)
         {
             var data = Encoding.UTF8.GetString(methodRequest.Data);
@@ -223,7 +222,7 @@ namespace Telemetry
             if (Int32.TryParse(data, out newTelemetryInterval))
             {
                 telemetryInterval = TimeSpan.FromSeconds(newTelemetryInterval);
-                Console.WriteLine($"Telemetry interval set to {data} seconds");
+                Log.Information($"Telemetry interval set to {data} seconds");
                 // Acknowlege the direct method call with a 200 success message
                 string result = "{\"result\":\"Executed direct method: " + methodRequest.Name + "\"}";
                 return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 200));
@@ -234,6 +233,39 @@ namespace Telemetry
                 string result = "{\"result\":\"Invalid parameter\"}";
                 return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 400));
             }
+        }
+
+        private static Task<MethodResponse> SetSessionId(MethodRequest methodRequest, object userContext)
+        {
+            var data = Encoding.UTF8.GetString(methodRequest.Data);
+
+            Guid newSessionId;
+            // Check the payload is valid GUID
+            if (Guid.TryParse(data, out newSessionId))
+            {
+                SessionID = newSessionId.ToString();
+                Log.Information($"SessionID set to {data}");
+                // Acknowlege the direct method call with a 200 success message
+                string result = "{\"result\":\"Executed direct method: " + methodRequest.Name + "\"}";
+                return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 200));
+            }
+            else
+            {
+                // Acknowlege the direct method call with a 400 error message
+                string result = "{\"result\":\"Invalid parameter\"}";
+                return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 400));
+            }
+        }
+
+        private static Task<MethodResponse> EndSession(MethodRequest methodRequest, object userContext)
+        {
+            var data = Encoding.UTF8.GetString(methodRequest.Data);
+
+            SessionID = "";
+            Log.Information($"Session Ended");
+            // Acknowlege the direct method call with a 200 success message
+            string result = "{\"result\":\"Executed direct method: " + methodRequest.Name + "\"}";
+            return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 200));
         }
 
 
