@@ -238,12 +238,10 @@ namespace Telemetry
         private static Task<MethodResponse> SetSessionId(MethodRequest methodRequest, object userContext)
         {
             var data = Encoding.UTF8.GetString(methodRequest.Data);
-
-            Guid newSessionId;
-            // Check the payload is valid GUID
-            if (Guid.TryParse(data, out newSessionId))
+            
+            if (!string.IsNullOrEmpty(data))
             {
-                SessionID = newSessionId.ToString();
+                SessionID = data;
                 Log.Information($"SessionID set to {data}");
                 // Acknowlege the direct method call with a 200 success message
                 string result = "{\"result\":\"Executed direct method: " + methodRequest.Name + "\"}";
@@ -252,7 +250,7 @@ namespace Telemetry
             else
             {
                 // Acknowlege the direct method call with a 400 error message
-                string result = "{\"result\":\"Invalid parameter\"}";
+                string result = "{\"result\":\"Payload Missing. Need the SessionId\"}";
                 return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 400));
             }
         }
