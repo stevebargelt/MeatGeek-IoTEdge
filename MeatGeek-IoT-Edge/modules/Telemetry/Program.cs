@@ -223,7 +223,7 @@ namespace Telemetry
             if (Int32.TryParse(data, out newTelemetryInterval))
             {
                 telemetryInterval = TimeSpan.FromSeconds(newTelemetryInterval);
-                Console.WriteLine($"Telemetry interval set to {0} seconds", data);
+                Console.WriteLine($"Telemetry interval set to {data} seconds");
                 // Acknowlege the direct method call with a 200 success message
                 string result = "{\"result\":\"Executed direct method: " + methodRequest.Name + "\"}";
                 return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 200));
