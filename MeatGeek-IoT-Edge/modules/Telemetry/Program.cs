@@ -241,8 +241,10 @@ namespace Telemetry
             
             if (!string.IsNullOrEmpty(data))
             {
-                SessionID = data;
-                Log.Information($"SessionID set to {data}");
+                Log.Information($"SessionID received: {data}");
+                var sessionID = data.Replace("\"", "");
+                SessionID = sessionID;
+                Log.Information($"SessionID set to {sessionID}");
                 // Acknowlege the direct method call with a 200 success message
                 string result = "{\"result\":\"Executed direct method: " + methodRequest.Name + "\"}";
                 return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 200));
