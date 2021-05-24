@@ -159,7 +159,6 @@ namespace Telemetry
                    status.SessionId = SessionID;
                 }
                 status.SmokerId = deviceId;
-                status.PartitionKey = $"{status.SmokerId}-{DateTime.UtcNow:yyyy-MM}";
                 json = JsonConvert.SerializeObject(status);
                 
                 Message eventMessage = new Message(Encoding.UTF8.GetBytes(json));
@@ -314,7 +313,6 @@ namespace Telemetry
 
     public class SmokerStatus
     {
-        [JsonProperty("partitionKey")] public string PartitionKey { get; set; }
         [JsonProperty("id")] public string Id { get; set; }
         [JsonProperty] public int? ttl { get; set; }
         [JsonProperty] public string SmokerId { get; set; }
