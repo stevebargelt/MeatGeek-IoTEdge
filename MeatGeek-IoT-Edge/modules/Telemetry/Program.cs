@@ -160,8 +160,16 @@ namespace Telemetry
                 }
                 status.SmokerId = deviceId;
                 status.Type = "status";
+                Log.Information($"SmokerStaus.SmokerId = {status.SmokerId}");
+                Log.Information($"SmokerStaus.Type = {status.Type}");
                 json = JsonConvert.SerializeObject(status);
-                
+                Log.Information($"*****************************************");
+                Log.Information($"  BEGIN JSON");
+                Log.Information($"*****************************************");
+                Log.Information($"{json}");
+                Log.Information($"*****************************************");
+                Log.Information($"  END JSON");
+                Log.Information($"*****************************************");
                 Message eventMessage = new Message(Encoding.UTF8.GetBytes(json));
                 eventMessage.ContentType = "application/json";
                 eventMessage.ContentEncoding = "UTF-8";
