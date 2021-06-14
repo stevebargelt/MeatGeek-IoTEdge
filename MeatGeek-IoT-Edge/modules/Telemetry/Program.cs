@@ -159,6 +159,7 @@ namespace Telemetry
                    status.SessionId = SessionID;
                 }
                 status.SmokerId = deviceId;
+                status.Type = "status";
                 json = JsonConvert.SerializeObject(status);
                 
                 Message eventMessage = new Message(Encoding.UTF8.GetBytes(json));
