@@ -157,7 +157,6 @@ namespace Telemetry
                 if (!string.IsNullOrEmpty(SessionID)) 
                 {
                    status.SessionId = SessionID;
-                   status.ttl = -1; //If a user starts a Session - don't delete the telemetry messages
                 }
                 status.SmokerId = deviceId;
                 status.Type = "status";
