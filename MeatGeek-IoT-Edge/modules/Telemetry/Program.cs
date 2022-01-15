@@ -152,7 +152,7 @@ namespace Telemetry
                     }
                 }
 
-                Log.Information($"Device sending Event/Telemetry to IoT Hub...");
+                // Log.Information($"Device sending Event/Telemetry to IoT Hub...");
                 SmokerStatus status = JsonConvert.DeserializeObject<SmokerStatus>(await _httpClient.GetStringAsync("http://localhost:5000/api/status"));
                 if (!string.IsNullOrEmpty(SessionID)) 
                 {
@@ -160,16 +160,9 @@ namespace Telemetry
                 }
                 status.SmokerId = deviceId;
                 status.Type = "status";
-                Log.Information($"SmokerStaus.SmokerId = {status.SmokerId}");
-                Log.Information($"SmokerStaus.Type = {status.Type}");
+                
                 json = JsonConvert.SerializeObject(status);
-                Log.Information($"*****************************************");
-                Log.Information($"  BEGIN JSON");
-                Log.Information($"*****************************************");
-                Log.Information($"{json}");
-                Log.Information($"*****************************************");
-                Log.Information($"  END JSON");
-                Log.Information($"*****************************************");
+                //Log.Information($"Device sending Event/Telemetry to IoT Hub| SmokerStaus.SmokerId = {status.SmokerId}, SmokerStaus.Type = {status.Type} || {json}");
                 Message eventMessage = new Message(Encoding.UTF8.GetBytes(json));
                 eventMessage.ContentType = "application/json";
                 eventMessage.ContentEncoding = "UTF-8";
@@ -181,7 +174,9 @@ namespace Telemetry
                 {
                     await moduleClient.SendEventAsync("output1", eventMessage);
                     //telemetry.TrackEvent("81-Heartbeat-Sent-MessageForwarder", telemetryProperties);
-                    Log.Information("Smoker Status message sent");
+                    //Log.Information("Smoker Status message sent");
+                    Log.Information($"Telemetry sent | SmokerStaus.SmokerId = {status.SmokerId}, SmokerStaus.Type = {status.Type} || {json}");
+
                 }
                 catch (Exception e)
                 {
@@ -189,8 +184,6 @@ namespace Telemetry
                     //telemetry.TrackEvent("85-ErrorHeartbeatMessageNotSentToEdgeHub", telemetryProperties);
                 }
 
-                //Log.Information($"\t{DateTime.Now.ToLocalTime()}> Sending message: {count}, Body: [{json}]");
-                //await moduleClient.SendEventAsync("output1", eventMessage);
                 count++;
                 await Task.Delay(telemetryInterval);
             }
@@ -199,8 +192,8 @@ namespace Telemetry
 
         static async Task OnDesiredPropertiesUpdated(TwinCollection desiredPropertiesPatch, object userContext)
         {
-            Log.Information("Desired property change:");
-            Log.Information(JsonConvert.SerializeObject(desiredPropertiesPatch));
+            // Log.Information("Desired property change:");
+            // Log.Information(JsonConvert.SerializeObject(desiredPropertiesPatch));
 
             var reportedProperties = new TwinCollection();
 
@@ -208,8 +201,7 @@ namespace Telemetry
             if (desiredPropertiesPatch.Contains("TelemetryInterval"))
             {
                 telemetryInterval = TimeSpan.FromSeconds((int)desiredPropertiesPatch["TelemetryInterval"]);
-                reportedProperties["TelemetryInterval"] = telemetryInterval;
-                
+                reportedProperties["TelemetryInterval"] = telemetryInterval;                
             }
             if (desiredPropertiesPatch.Contains("SessionId"))
             {
@@ -217,8 +209,6 @@ namespace Telemetry
                 reportedProperties["SessionId"] = SessionID;
             }            
             var moduleClient = (ModuleClient)userContext;
-            //var patch = new TwinCollection($"{{ \"TelemetryInterval\": {telemetryInterval.TotalSeconds} }}");
-            //await moduleClient.UpdateReportedPropertiesAsync(patch); // Just report back last desired property.
             await moduleClient.UpdateReportedPropertiesAsync(reportedProperties).ConfigureAwait(false);
         }
 
@@ -232,13 +222,12 @@ namespace Telemetry
             {
                 telemetryInterval = TimeSpan.FromSeconds(newTelemetryInterval);
                 Log.Information($"Telemetry interval set to {data} seconds");
-                // Acknowlege the direct method call with a 200 success message
                 string result = "{\"result\":\"Executed direct method: " + methodRequest.Name + "\"}";
                 return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 200));
             }
             else
             {
-                // Acknowlege the direct method call with a 400 error message
+                Log.Warning("SetTelemetryLevel Error: Invalid Parameter");
                 string result = "{\"result\":\"Invalid parameter\"}";
                 return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 400));
             }
@@ -250,7 +239,6 @@ namespace Telemetry
             
             if (!string.IsNullOrEmpty(data))
             {
-                Log.Information($"SessionID received: {data}");
                 var sessionID = data.Replace("\"", "");
                 SessionID = sessionID;
                 Log.Information($"SessionID set to {sessionID}");
@@ -260,7 +248,7 @@ namespace Telemetry
             }
             else
             {
-                // Acknowlege the direct method call with a 400 error message
+                Log.Warning("SetTelemetryLevel Error: Invalid Parameter");
                 string result = "{\"result\":\"Payload Missing. Need the SessionId\"}";
                 return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 400));
             }
@@ -272,7 +260,6 @@ namespace Telemetry
 
             SessionID = "";
             Log.Information($"Session Ended");
-            // Acknowlege the direct method call with a 200 success message
             string result = "{\"result\":\"Executed direct method: " + methodRequest.Name + "\"}";
             return Task.FromResult(new MethodResponse(Encoding.UTF8.GetBytes(result), 200));
         }
