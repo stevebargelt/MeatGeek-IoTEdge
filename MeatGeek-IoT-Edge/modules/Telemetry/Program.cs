@@ -10,7 +10,6 @@ namespace Telemetry
     using Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Devices.Client.Transport.Mqtt;
     using Microsoft.Azure.Devices.Shared;
-    using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
     using Serilog;
     using Serilog.Configuration;
